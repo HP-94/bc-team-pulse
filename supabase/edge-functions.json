@@ -1,0 +1,9 @@
+{
+    "sync": {
+      "verify_jwt": false,
+      "schedule": {
+        "cron": "0 3 * * *"
+      }
+    }
+  }
+  
