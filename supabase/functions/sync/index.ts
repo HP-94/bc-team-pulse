@@ -32,13 +32,11 @@ serve(async (req) => {
       headers: { Authorization: `Bearer ${access}`, "User-Agent": UA },
     }).then(r => r.json());
 
-  // 1. list projects
   const projects = await bc("/projects.json");
 
   for (const p of projects) {
     await supabase.from("projects").upsert({ id: p.id, name: p.name });
 
-    // 2. questionnaire id from dock
     const dock = await bc(`/projects/${p.id}.json`);
     const qUrl = dock.dock.find((d: any) => d.name === "questionnaire")?.url;
     if (!qUrl) continue;
@@ -53,7 +51,6 @@ serve(async (req) => {
       await supabase.from("questions")
         .upsert({ id: q.id, project_id: p.id, questionnaire_id: qnId, prompt: q.subject });
 
-      // answers may be paginated
       let page = 1;
       while (true) {
         const ans = await bc(
@@ -82,7 +79,6 @@ serve(async (req) => {
         }));
         await supabase.from("people").upsert(peopleRows, { ignoreDuplicates: true });
 
-        // answers upsert
         await supabase.from("answers").upsert(rows);
 
         page++;
